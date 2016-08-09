@@ -32,6 +32,7 @@ namespace WinFormsTCP_Server
             Thread myThread = new Thread(someFunc);
             myThread.IsBackground = true;
             myThread.Start();
+            btnStart.Enabled = false;
         }
 
         public void someFunc()
@@ -68,7 +69,7 @@ namespace WinFormsTCP_Server
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-
+            listView1.Items.Clear();
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
