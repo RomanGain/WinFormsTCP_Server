@@ -97,6 +97,14 @@
   <ItemGroup>
     <None Include="Resources\door.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\alert.ico" />
+    <Content Include="Resources\cancel.ico" />
+    <Content Include="Resources\delete.ico" />
+    <Content Include="Resources\delete1.ico" />
+    <Content Include="Resources\information.ico" />
+    <Content Include="Resources\success.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

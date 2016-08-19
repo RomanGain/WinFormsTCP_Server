@@ -87,7 +87,7 @@ namespace WinFormsTCP_Server
             {
                 case "ftl":
                     lblErrorsValue.Text = countErrors.ToString();
-                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\delete1.ico");
+                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\delete1");
                     listView1.Items[index].BackColor = Color.Coral;
 
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
@@ -121,7 +121,8 @@ namespace WinFormsTCP_Server
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 default:
-                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\success.ico");
+                    //this.notifyIcon1.Icon = WinFormsTCP_Server.Properties.Resources.;
+                        //new Icon("success.ico");
                     break;
             }
         }
