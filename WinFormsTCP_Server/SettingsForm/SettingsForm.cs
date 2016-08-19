@@ -8,6 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using System.Net.Sockets;
+using System.Net;
+using System.IO;
+
 namespace WinFormsTCP_Server.SettingsForm
 {
     public partial class SettingsForm : Form
@@ -24,6 +28,27 @@ namespace WinFormsTCP_Server.SettingsForm
         private void btnCancel_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void btnOk_Click(object sender, EventArgs e)
+        {
+            TcpClient client = new TcpClient();
+
+            NetworkStream ns;
+
+            string ip_address = "10.11.2.189";
+            int port = 11000;
+
+        //client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000)); // локальный
+        client.Connect(new IPEndPoint(IPAddress.Parse(ip_address), port)); // ноута
+            string str;
+            StreamWriter sw = new StreamWriter(client.GetStream());
+            sw.AutoFlush = true;
+            //str = textBoxIPAddress.Text+"shitshitshitshit";
+            //sw.WriteLine(str);
+            str = textBoxPort.Text + "shitshitshitshit";
+            sw.WriteLine(str);
+            client.Close();
         }
     }
 }

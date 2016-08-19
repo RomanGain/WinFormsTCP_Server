@@ -121,7 +121,7 @@ namespace WinFormsTCP_Server
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 default:
-                    //this.notifyIcon1.Icon = WinFormsTCP_Server.Properties.Resources.;
+                    //this.notifyIcon1.Icon = WinFormsTCP_Server.Properties.Resources();
                         //new Icon("success.ico");
                     break;
             }
