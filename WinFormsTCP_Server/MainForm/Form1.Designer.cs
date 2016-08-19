@@ -60,6 +60,7 @@
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
+            this.notifyIcon1.BalloonTipClicked += new System.EventHandler(this.notifyIcon1_BalloonTipClicked);
             // 
             // contextMenuStrip1
             // 
@@ -67,21 +68,21 @@
             this.showToolStripMenuItem,
             this.closeToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(104, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 48);
             // 
             // showToolStripMenuItem
             // 
             this.showToolStripMenuItem.Name = "showToolStripMenuItem";
-            this.showToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
-            this.showToolStripMenuItem.Text = "Show";
+            this.showToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.showToolStripMenuItem.Text = "Показать";
             this.showToolStripMenuItem.Click += new System.EventHandler(this.showToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Image = global::WinFormsTCP_Server.Properties.Resources.door;
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
-            this.closeToolStripMenuItem.Text = "Close";
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.closeToolStripMenuItem.Text = "Закрыть";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
             // listView1
@@ -109,22 +110,22 @@
             // 
             // columnMessage
             // 
-            this.columnMessage.Text = "Message";
+            this.columnMessage.Text = "Сообщение";
             this.columnMessage.Width = 302;
             // 
             // columnDate
             // 
-            this.columnDate.Text = "Date";
+            this.columnDate.Text = "Время";
             this.columnDate.Width = 143;
             // 
             // columnType
             // 
-            this.columnType.Text = "Type";
+            this.columnType.Text = "Тип сообщения";
             this.columnType.Width = 103;
             // 
             // columnApplication
             // 
-            this.columnApplication.Text = "Application";
+            this.columnApplication.Text = "Программа";
             this.columnApplication.Width = 119;
             // 
             // button1
@@ -142,18 +143,18 @@
             this.lblErrors.AutoSize = true;
             this.lblErrors.Location = new System.Drawing.Point(760, 42);
             this.lblErrors.Name = "lblErrors";
-            this.lblErrors.Size = new System.Drawing.Size(37, 13);
+            this.lblErrors.Size = new System.Drawing.Size(50, 13);
             this.lblErrors.TabIndex = 12;
-            this.lblErrors.Text = "Errors:";
+            this.lblErrors.Text = "Ошибки:";
             // 
             // lblExceptions
             // 
             this.lblExceptions.AutoSize = true;
             this.lblExceptions.Location = new System.Drawing.Point(760, 74);
             this.lblExceptions.Name = "lblExceptions";
-            this.lblExceptions.Size = new System.Drawing.Size(62, 13);
+            this.lblExceptions.Size = new System.Drawing.Size(97, 13);
             this.lblExceptions.TabIndex = 13;
-            this.lblExceptions.Text = "Exceptions:";
+            this.lblExceptions.Text = "Предупреждения:";
             // 
             // lblErrorsValue
             // 
@@ -195,13 +196,14 @@
             // параметрыToolStripMenuItem
             // 
             this.параметрыToolStripMenuItem.Name = "параметрыToolStripMenuItem";
-            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.параметрыToolStripMenuItem.Text = "Параметры";
+            this.параметрыToolStripMenuItem.Click += new System.EventHandler(this.параметрыToolStripMenuItem_Click);
             // 
             // выходToolStripMenuItem
             // 
             this.выходToolStripMenuItem.Name = "выходToolStripMenuItem";
-            this.выходToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.выходToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.выходToolStripMenuItem.Text = "Выход";
             this.выходToolStripMenuItem.Click += new System.EventHandler(this.выходToolStripMenuItem_Click);
             // 

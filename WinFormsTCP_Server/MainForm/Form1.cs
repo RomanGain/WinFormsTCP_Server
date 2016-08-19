@@ -16,13 +16,17 @@ using System.Globalization;
 using log4net;
 using log4net.Config;
 
+using WinFormsTCP_Server.SettingsForm;
+
 namespace WinFormsTCP_Server
 {
     public partial class Form1 : Form
     {
         //private static ILog someLOg;
         CreateLogClass cls = new CreateLogClass();
-        TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000));
+        static string ip_address = "127.0.0.1";
+        static int port = 11000;
+        TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Parse(ip_address), port));
         public Form1()
         {
             InitializeComponent();
@@ -63,7 +67,7 @@ namespace WinFormsTCP_Server
                     listView1.Items[index].SubItems.Add(varFromClient_onlyCommand); // Добавление Сообщения в listView 
                     listView1.Items[index].SubItems.Add(DateTime.Now.ToString()); // Добавление времени в listView 
                     listView1.Items[index].SubItems.Add(addedCondition(varFromClient, varFromClient_onlyCommand)); // Добавление Типа сообщения в listView 
-                    condition(varFromClientEnd, varFromClientBegin, index, ref countErrors, ref countExceptions);
+                    condition(varFromClientEnd, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
                     listView1.Items[index].SubItems.Add(ProgramCondition(varFromClientBegin)); // Добавление приложения в listView 
                     ++listCounter;
                     client.Close();
@@ -77,7 +81,7 @@ namespace WinFormsTCP_Server
 
         //---------------------------Проверка условия----------------------------------------------
 
-        public void condition(string varFromClientEnd, string varFromClientBegin, int index, ref int countErrors, ref int countExceptions)
+        public void condition(string varFromClientEnd, string varFromClient_onlyCommand, int index, ref int countErrors, ref int countExceptions)
         {
             switch (varFromClientEnd)
             {
@@ -87,8 +91,8 @@ namespace WinFormsTCP_Server
                     listView1.Items[index].BackColor = Color.Coral;
 
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
-                    notifyIcon1.BalloonTipTitle = "Fatal Error";
-                    notifyIcon1.BalloonTipText = "Fatal Error text: " + varFromClientBegin;
+                    notifyIcon1.BalloonTipTitle = "Фатальная ошибка";
+                    notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 case "err":
@@ -98,9 +102,11 @@ namespace WinFormsTCP_Server
                     listView1.Items[index].BackColor = Color.Coral;
 
                     //contextMenuStrip1.Show();
+                    contextMenuStrip1.Items.Add(new ToolStripSeparator());
+                    contextMenuStrip1.Items.Add(varFromClient_onlyCommand);
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
-                    notifyIcon1.BalloonTipTitle = "Error";
-                    notifyIcon1.BalloonTipText = "Error text: " + varFromClientBegin;
+                    notifyIcon1.BalloonTipTitle = "Ошибка";
+                    notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 case "wrn":
@@ -110,8 +116,8 @@ namespace WinFormsTCP_Server
                     listView1.Items[index].BackColor = Color.SandyBrown;
 
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Warning;
-                    notifyIcon1.BalloonTipTitle = "Exception";
-                    notifyIcon1.BalloonTipText = "Exception text: " + varFromClientBegin;
+                    notifyIcon1.BalloonTipTitle = "Предупреждение";
+                    notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 default:
@@ -128,26 +134,26 @@ namespace WinFormsTCP_Server
             {
                 case "inf":
                     cls.Info(varFromClient_onlyCommand);
-                    return "Info";
+                    return "Инфо";
                     break;
                 case "wrn":
                     cls.Warning(varFromClient_onlyCommand);
-                    return "Warning";
+                    return "Предупреждение";
                     break;
                 case "err":
                     cls.Error(varFromClient_onlyCommand);
-                    return "Error";
+                    return "Ошибка";
                     break;
                 case "dbg":
                     cls.Debug(varFromClient_onlyCommand);
-                    return "Debug";
+                    return "Отладочное сообщение";
                     break;
                 case "ftl":
                     cls.Fatal(varFromClient_onlyCommand);
-                    return "Fatal";
+                    return "Фатальная ошибка";
                     break;
                 default:
-                    return "Unknown";
+                    return "Неизвестно";
                     break;
             }
         }
@@ -167,7 +173,7 @@ namespace WinFormsTCP_Server
                     return ProgramTitle;
                     break;
                 default:
-                    ProgramTitle = "Unknown";
+                    ProgramTitle = "Неизвестно";
                     return ProgramTitle;
                     break;
             }
@@ -213,6 +219,18 @@ namespace WinFormsTCP_Server
         private void showToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Normal;
+        }
+
+        private void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        private void параметрыToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm.SettingsForm sf = new SettingsForm.SettingsForm(ip_address, port);
+            sf.Show();
         }
     }
 
