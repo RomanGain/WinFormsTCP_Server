@@ -18,7 +18,6 @@ namespace WinFormsTCP_Server.SettingsForm
     {
         public SettingsForm(string ip_address, int port)
         {
-            //Form1 frm1 = new Form1();
             InitializeComponent();
             textBoxIPAddress.Text = ip_address;
             textBoxPort.Text = port.ToString();
@@ -32,23 +31,45 @@ namespace WinFormsTCP_Server.SettingsForm
 
         private void btnOk_Click(object sender, EventArgs e)
         {
+            try
+            {
+                ChangeIPAtServer();
+                this.Close();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void ChangeIPAtServer() //Функция изменения IP адреса передачи у dcCore 
+        {
             TcpClient client = new TcpClient();
 
             NetworkStream ns;
 
-            string ip_address = "10.11.2.189";
+            //string ip_address = "10.11.2.189";
+            //int port = 11000;
+
+            string ip_address = textBoxIPAddress.Text;
             int port = 11000;
 
-        //client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000)); // локальный
-        client.Connect(new IPEndPoint(IPAddress.Parse(ip_address), port)); // ноута
+            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12000)); // локальный
+
             string str;
             StreamWriter sw = new StreamWriter(client.GetStream());
             sw.AutoFlush = true;
             //str = textBoxIPAddress.Text+"shitshitshitshit";
             //sw.WriteLine(str);
-            str = textBoxPort.Text + "shitshitshitshit";
+            str = ip_address;
             sw.WriteLine(str);
             client.Close();
+
+
+
+            //client.Connect(new IPEndPoint(IPAddress.Parse(ip_address), port)); // ноута
+
+            
         }
     }
 }

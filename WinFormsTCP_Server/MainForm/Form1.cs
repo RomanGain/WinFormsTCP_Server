@@ -198,6 +198,7 @@ namespace WinFormsTCP_Server
             //cls.Warning("This is Warning!");
             //cls.Debug("This is Debug!");
 
+            listView1.Items.Add("shit");
             if (this.WindowState == FormWindowState.Normal)
                 MessageBox.Show("It's normal");
             else if (this.WindowState == FormWindowState.Minimized)
@@ -231,7 +232,13 @@ namespace WinFormsTCP_Server
         private void параметрыToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsForm.SettingsForm sf = new SettingsForm.SettingsForm(ip_address, port);
-            sf.Show();
+            sf.ShowDialog();
+
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            listView1.Items.Clear();
         }
     }
 
