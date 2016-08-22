@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Globalization;
+using System.ServiceProcess;
 
 using log4net;
 using log4net.Config;
@@ -24,9 +25,12 @@ namespace WinFormsTCP_Server
     {
         //private static ILog someLOg;
         CreateLogClass cls = new CreateLogClass();
-        static string ip_address = "127.0.0.1";
+        static string local_host = System.Net.Dns.GetHostName();
+        static string local_ipAddress = Dns.GetHostByName(local_host).AddressList[0].ToString(); // устаревшее?
+        //static string ip_address = System.Net.Dns.GetHostName();
+            //"127.0.0.1";
         static int port = 11000;
-        TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Parse(ip_address), port));
+        TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Parse(local_ipAddress), port));
         public Form1()
         {
             InitializeComponent();
@@ -63,13 +67,20 @@ namespace WinFormsTCP_Server
                     string varFromClient_onlyCommand = varFromClientBegin.Remove(varFromClientBegin.Length - 6);
                     //--------------------------
 
-                    int index = listView1.Items.Add(listCounter.ToString()).Index; // Добавление ID в listView
-                    listView1.Items[index].SubItems.Add(varFromClient_onlyCommand); // Добавление Сообщения в listView 
-                    listView1.Items[index].SubItems.Add(DateTime.Now.ToString()); // Добавление времени в listView 
-                    listView1.Items[index].SubItems.Add(addedCondition(varFromClient, varFromClient_onlyCommand)); // Добавление Типа сообщения в listView 
-                    condition(varFromClientEnd, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
-                    listView1.Items[index].SubItems.Add(ProgramCondition(varFromClientBegin)); // Добавление приложения в listView 
-                    ++listCounter;
+                    if (checkMark(varFromClientEnd))
+                    {
+                        int index = listView1.Items.Add(listCounter.ToString()).Index; // Добавление ID в listView
+                        listView1.Items[index].SubItems.Add(varFromClient_onlyCommand); // Добавление Сообщения в listView 
+                        listView1.Items[index].SubItems.Add(DateTime.Now.ToString()); // Добавление времени в listView 
+                        listView1.Items[index].SubItems.Add(addedCondition(varFromClient, varFromClient_onlyCommand)); // Добавление Типа сообщения в listView 
+                        condition(varFromClientEnd, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
+                        listView1.Items[index].SubItems.Add(ProgramCondition(varFromClientBegin)); // Добавление приложения в listView 
+                        ++listCounter;
+                    }
+                    else
+                    {
+                        addedCondition(varFromClient, varFromClient_onlyCommand);
+                    }
                     client.Close();
                 }
                 catch (System.IO.IOException io)
@@ -127,6 +138,7 @@ namespace WinFormsTCP_Server
             }
         }
 
+
         //------------------------Проверка на тип-----------------------------
         public string addedCondition(string varFromClient, string varFromClient_onlyCommand)
         {
@@ -154,10 +166,34 @@ namespace WinFormsTCP_Server
                     return "Фатальная ошибка";
                     break;
                 default:
+                    cls.Info(varFromClient_onlyCommand);
                     return "Неизвестно";
                     break;
             }
         }
+
+        public bool checkMark(string varFromClientEnd)
+        {
+            switch (varFromClientEnd)
+            {
+                case "inf":
+                    if (informMessagesToolStripMenuItem.Checked == true)
+                        return true;
+                    else
+                        return false;
+                    break;
+                case "wrn":
+                    if (warningsToolStripMenuItem.Checked == true)
+                        return true;
+                    else
+                        return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            }
+        }
+
         //-------------------------Определение программы-------------------------
 
         public string ProgramCondition(string varFromClientBegin)
@@ -198,16 +234,31 @@ namespace WinFormsTCP_Server
             //cls.Warning("This is Warning!");
             //cls.Debug("This is Debug!");
 
-            listView1.Items.Add("shit");
-            if (this.WindowState == FormWindowState.Normal)
-                MessageBox.Show("It's normal");
-            else if (this.WindowState == FormWindowState.Minimized)
-                MessageBox.Show("It's minimized");
-            else if (this.WindowState == FormWindowState.Maximized)
-                MessageBox.Show("It's maximized");
+            //listView1.Items.Add("shit");
+
+
+            //if (this.WindowState == FormWindowState.Normal)
+            //    MessageBox.Show("It's normal");
+            //else if (this.WindowState == FormWindowState.Minimized)
+            //    MessageBox.Show("It's minimized");
+            //else if (this.WindowState == FormWindowState.Maximized)
+            //    MessageBox.Show("It's maximized");
+
+            //MessageBox.Show(local_host);
+            //MessageBox.Show(local_ipAddress);
+
+            try
+            {
+                ServiceController sc = new ServiceController("Report Manager32");
+                MessageBox.Show(sc.Status.ToString());
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
-        private void listView1_DoubleClick(object sender, EventArgs e)
+        private void listView1_DoubleClick(object sender, EventArgs e) // Двойной клик по элементу списка 
         {
             System.Diagnostics.Process.GetCurrentProcess();
             MessageBox.Show(System.Diagnostics.Process.GetCurrentProcess().ToString());
@@ -220,10 +271,19 @@ namespace WinFormsTCP_Server
 
         private void showToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Normal;
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = FormWindowState.Minimized;
+                this.Visible = false;
+            }
         }
 
-        private void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        private void notifyIcon1_BalloonTipClicked(object sender, EventArgs e) // Клик по инф. облаку в трее 
         {
             if (this.WindowState == FormWindowState.Minimized)
             this.WindowState = FormWindowState.Normal;
@@ -231,7 +291,7 @@ namespace WinFormsTCP_Server
 
         private void параметрыToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SettingsForm.SettingsForm sf = new SettingsForm.SettingsForm(ip_address, port);
+            SettingsForm.SettingsForm sf = new SettingsForm.SettingsForm(local_ipAddress, port);
             sf.ShowDialog();
 
         }
@@ -240,6 +300,39 @@ namespace WinFormsTCP_Server
         {
             listView1.Items.Clear();
         }
+
+
+        //---------------------------------------- Формат -------------------------------
+
+        private void errorsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (errorsToolStripMenuItem.Checked == true)
+                errorsToolStripMenuItem.Checked = false;
+            else
+                errorsToolStripMenuItem.Checked = true;
+        }
+
+        private void warningsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (warningsToolStripMenuItem.Checked == true)
+                warningsToolStripMenuItem.Checked = false;
+            else
+                warningsToolStripMenuItem.Checked = true;
+        }
+
+        private void informMessagesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (informMessagesToolStripMenuItem.Checked == true)
+                informMessagesToolStripMenuItem.Checked = false;
+            else
+                informMessagesToolStripMenuItem.Checked = true;
+        }
+
+        private void timerCheckStatus_Tick(object sender, EventArgs e)
+        {
+
+        }
+        //-------------------------------------------------------------------------------
     }
 
     public class CreateLogClass

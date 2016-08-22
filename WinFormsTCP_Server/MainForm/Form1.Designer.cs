@@ -47,12 +47,20 @@
             this.lblErrorsValue = new System.Windows.Forms.Label();
             this.lblExceptionsValue = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.фToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.параметрыToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.выходToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.formatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.errorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.warningsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.informMessagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnClear = new System.Windows.Forms.Button();
+            this.groupBoxErorsAndWarnings = new System.Windows.Forms.GroupBox();
+            this.timerCheckStatus = new System.Windows.Forms.Timer(this.components);
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.groupBoxErorsAndWarnings.SuspendLayout();
             this.SuspendLayout();
             // 
             // notifyIcon1
@@ -69,22 +77,25 @@
             this.showToolStripMenuItem,
             this.closeToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(171, 48);
             // 
             // showToolStripMenuItem
             // 
             this.showToolStripMenuItem.Name = "showToolStripMenuItem";
-            this.showToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.showToolStripMenuItem.Text = "Показать";
+            this.showToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.showToolStripMenuItem.Text = "Показать/Скрыть";
             this.showToolStripMenuItem.Click += new System.EventHandler(this.showToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Image = global::WinFormsTCP_Server.Properties.Resources.door;
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.closeToolStripMenuItem.Text = "Закрыть";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+            // 
+            // timer1
+            // 
             // 
             // listView1
             // 
@@ -142,7 +153,7 @@
             // lblErrors
             // 
             this.lblErrors.AutoSize = true;
-            this.lblErrors.Location = new System.Drawing.Point(760, 42);
+            this.lblErrors.Location = new System.Drawing.Point(6, 29);
             this.lblErrors.Name = "lblErrors";
             this.lblErrors.Size = new System.Drawing.Size(50, 13);
             this.lblErrors.TabIndex = 12;
@@ -151,7 +162,7 @@
             // lblExceptions
             // 
             this.lblExceptions.AutoSize = true;
-            this.lblExceptions.Location = new System.Drawing.Point(760, 74);
+            this.lblExceptions.Location = new System.Drawing.Point(6, 66);
             this.lblExceptions.Name = "lblExceptions";
             this.lblExceptions.Size = new System.Drawing.Size(97, 13);
             this.lblExceptions.TabIndex = 13;
@@ -160,7 +171,7 @@
             // lblErrorsValue
             // 
             this.lblErrorsValue.AutoSize = true;
-            this.lblErrorsValue.Location = new System.Drawing.Point(871, 42);
+            this.lblErrorsValue.Location = new System.Drawing.Point(111, 29);
             this.lblErrorsValue.Name = "lblErrorsValue";
             this.lblErrorsValue.Size = new System.Drawing.Size(35, 13);
             this.lblErrorsValue.TabIndex = 14;
@@ -169,7 +180,7 @@
             // lblExceptionsValue
             // 
             this.lblExceptionsValue.AutoSize = true;
-            this.lblExceptionsValue.Location = new System.Drawing.Point(871, 74);
+            this.lblExceptionsValue.Location = new System.Drawing.Point(111, 66);
             this.lblExceptionsValue.Name = "lblExceptionsValue";
             this.lblExceptionsValue.Size = new System.Drawing.Size(35, 13);
             this.lblExceptionsValue.TabIndex = 15;
@@ -178,35 +189,80 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.фToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.formatToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(930, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(939, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // фToolStripMenuItem
+            // fileToolStripMenuItem
             // 
-            this.фToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.параметрыToolStripMenuItem,
+            this.toolStripSeparator1,
             this.выходToolStripMenuItem});
-            this.фToolStripMenuItem.Name = "фToolStripMenuItem";
-            this.фToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
-            this.фToolStripMenuItem.Text = "Файл";
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.fileToolStripMenuItem.Text = "Файл";
             // 
             // параметрыToolStripMenuItem
             // 
             this.параметрыToolStripMenuItem.Name = "параметрыToolStripMenuItem";
-            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.параметрыToolStripMenuItem.Text = "Параметры";
+            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.параметрыToolStripMenuItem.Text = "Параметры...";
             this.параметрыToolStripMenuItem.Click += new System.EventHandler(this.параметрыToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(144, 6);
             // 
             // выходToolStripMenuItem
             // 
             this.выходToolStripMenuItem.Name = "выходToolStripMenuItem";
-            this.выходToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.выходToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.выходToolStripMenuItem.Text = "Выход";
             this.выходToolStripMenuItem.Click += new System.EventHandler(this.выходToolStripMenuItem_Click);
+            // 
+            // formatToolStripMenuItem
+            // 
+            this.formatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.errorsToolStripMenuItem,
+            this.warningsToolStripMenuItem,
+            this.informMessagesToolStripMenuItem});
+            this.formatToolStripMenuItem.Name = "formatToolStripMenuItem";
+            this.formatToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
+            this.formatToolStripMenuItem.Text = "Формат";
+            // 
+            // errorsToolStripMenuItem
+            // 
+            this.errorsToolStripMenuItem.Checked = true;
+            this.errorsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.errorsToolStripMenuItem.Enabled = false;
+            this.errorsToolStripMenuItem.Name = "errorsToolStripMenuItem";
+            this.errorsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.errorsToolStripMenuItem.Text = "Ошибки";
+            this.errorsToolStripMenuItem.Click += new System.EventHandler(this.errorsToolStripMenuItem_Click);
+            // 
+            // warningsToolStripMenuItem
+            // 
+            this.warningsToolStripMenuItem.Checked = true;
+            this.warningsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.warningsToolStripMenuItem.Name = "warningsToolStripMenuItem";
+            this.warningsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.warningsToolStripMenuItem.Text = "Предупреждения";
+            this.warningsToolStripMenuItem.Click += new System.EventHandler(this.warningsToolStripMenuItem_Click);
+            // 
+            // informMessagesToolStripMenuItem
+            // 
+            this.informMessagesToolStripMenuItem.Checked = true;
+            this.informMessagesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.informMessagesToolStripMenuItem.Name = "informMessagesToolStripMenuItem";
+            this.informMessagesToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.informMessagesToolStripMenuItem.Text = "Информ. сообщения";
+            this.informMessagesToolStripMenuItem.Click += new System.EventHandler(this.informMessagesToolStripMenuItem_Click);
             // 
             // btnClear
             // 
@@ -218,20 +274,33 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
+            // groupBoxErorsAndWarnings
+            // 
+            this.groupBoxErorsAndWarnings.Controls.Add(this.lblExceptions);
+            this.groupBoxErorsAndWarnings.Controls.Add(this.lblExceptionsValue);
+            this.groupBoxErorsAndWarnings.Controls.Add(this.lblErrorsValue);
+            this.groupBoxErorsAndWarnings.Controls.Add(this.lblErrors);
+            this.groupBoxErorsAndWarnings.Location = new System.Drawing.Point(760, 27);
+            this.groupBoxErorsAndWarnings.Name = "groupBoxErorsAndWarnings";
+            this.groupBoxErorsAndWarnings.Size = new System.Drawing.Size(167, 100);
+            this.groupBoxErorsAndWarnings.TabIndex = 18;
+            this.groupBoxErorsAndWarnings.TabStop = false;
+            // 
+            // timerCheckStatus
+            // 
+            this.timerCheckStatus.Tick += new System.EventHandler(this.timerCheckStatus_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(930, 619);
+            this.ClientSize = new System.Drawing.Size(939, 619);
             this.Controls.Add(this.btnClear);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.lblExceptionsValue);
-            this.Controls.Add(this.lblErrorsValue);
-            this.Controls.Add(this.lblExceptions);
-            this.Controls.Add(this.lblErrors);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.listView1);
+            this.Controls.Add(this.groupBoxErorsAndWarnings);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -239,6 +308,8 @@
             this.contextMenuStrip1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.groupBoxErorsAndWarnings.ResumeLayout(false);
+            this.groupBoxErorsAndWarnings.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -262,10 +333,17 @@
         private System.Windows.Forms.Label lblExceptionsValue;
         private System.Windows.Forms.ColumnHeader columnApplication;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem фToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem параметрыToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem выходToolStripMenuItem;
         private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem formatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem errorsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem warningsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem informMessagesToolStripMenuItem;
+        private System.Windows.Forms.GroupBox groupBoxErorsAndWarnings;
+        private System.Windows.Forms.Timer timerCheckStatus;
     }
 }
 
