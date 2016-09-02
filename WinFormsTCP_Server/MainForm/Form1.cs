@@ -27,16 +27,18 @@ namespace WinFormsTCP_Server
         CreateLogClass cls = new CreateLogClass();
         static string local_host = System.Net.Dns.GetHostName();
         static string local_ipAddress = Dns.GetHostByName(local_host).AddressList[0].ToString(); // устаревшее?
+        static int maxNumberOfNotes = 20; // максимальное количество записей в dataSet
+
         //static string ip_address = System.Net.Dns.GetHostName();
             //"127.0.0.1";
         static int port = 11000;
         TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Parse(local_ipAddress), port));
+
+
         public Form1()
         {
             InitializeComponent();
-
-            //this.Hide();
-            this.WindowState = FormWindowState.Minimized;
+            //this.WindowState = FormWindowState.Minimized;
 
             notifyIcon1.Visible = true;
             lblErrorsValue.Text = "0";
@@ -51,36 +53,81 @@ namespace WinFormsTCP_Server
 
         public void someFunc()
         {
-            int countErrors = 0, countExceptions = 0, listCounter = 1;
+            int countErrors = 0, countExceptions = 0; // вывод на форму числа ошибок, исключений
+            int listCounter = 1; // счетчик числа сообщений в listView
             System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false; // ненадежная фигня :/
+
+            DataSet ds = new DataSet();
+            DataTable incomingMessagesTable = new DataTable();
+
+            ds.Tables.Add(incomingMessagesTable);
+
+            DataColumn idColumn = new DataColumn("ID");
+            idColumn.AutoIncrement = true;
+            idColumn.AutoIncrementSeed = 1;
+            idColumn.AutoIncrementStep = 1;
+
+            DataColumn messageColumn = new DataColumn("Message", Type.GetType("System.String"));
+            DataColumn dateColumn = new DataColumn("Date", Type.GetType("System.String"));
+            DataColumn typeColumn = new DataColumn("Type", Type.GetType("System.String"));
+            DataColumn appColumn = new DataColumn("App", Type.GetType("System.String"));
+
+            incomingMessagesTable.Columns.Add(idColumn);
+            incomingMessagesTable.Columns.Add(messageColumn);
+            incomingMessagesTable.Columns.Add(dateColumn);
+            incomingMessagesTable.Columns.Add(typeColumn);
+            incomingMessagesTable.Columns.Add(appColumn);
+
             while (true)
             {
                 try
                 {
                     TcpClient client = listner.AcceptTcpClient();
                     StreamReader sr = new StreamReader(client.GetStream());
-                    string varFromClient = sr.ReadLine();
-                    
+                    string fullVarFromClient = sr.ReadLine();
+
                     //--------------------------
-                    string varFromClientBegin = varFromClient.Remove(varFromClient.Length - 3);
-                    string varFromClientEnd = varFromClient.Remove(0,varFromClient.Length - 3);
+                    string varFromClientBegin = fullVarFromClient.Remove(fullVarFromClient.Length - 3);
+                    string cut_type = fullVarFromClient.Remove(0, fullVarFromClient.Length - 3);
                     string varFromClient_onlyCommand = varFromClientBegin.Remove(varFromClientBegin.Length - 6);
                     //--------------------------
-
-                    if (checkMark(varFromClientEnd))
+                    if (incomingMessagesTable.Rows.Count >= maxNumberOfNotes)
                     {
-                        int index = listView1.Items.Add(listCounter.ToString()).Index; // Добавление ID в listView
-                        listView1.Items[index].SubItems.Add(varFromClient_onlyCommand); // Добавление Сообщения в listView 
-                        listView1.Items[index].SubItems.Add(DateTime.Now.ToString()); // Добавление времени в listView 
-                        listView1.Items[index].SubItems.Add(addedCondition(varFromClient, varFromClient_onlyCommand)); // Добавление Типа сообщения в listView 
-                        condition(varFromClientEnd, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
-                        listView1.Items[index].SubItems.Add(ProgramCondition(varFromClientBegin)); // Добавление приложения в listView 
-                        ++listCounter;
+                        for (int i = 1; i < maxNumberOfNotes; i++)
+                        {
+                            //incomingMessagesTable.Rows[i - 1][0] = incomingMessagesTable.Rows[i][0].ToString();
+                            incomingMessagesTable.Rows[i - 1][1] = incomingMessagesTable.Rows[i][1].ToString();
+                            incomingMessagesTable.Rows[i - 1][2] = incomingMessagesTable.Rows[i][2].ToString();
+                            incomingMessagesTable.Rows[i - 1][3] = incomingMessagesTable.Rows[i][3].ToString();
+                            incomingMessagesTable.Rows[i - 1][4] = incomingMessagesTable.Rows[i][4].ToString();
+                        }
+
+                        //incomingMessagesTable.Rows[maxNumberOfNotes - 1][0] = 6;
+                        incomingMessagesTable.Rows[maxNumberOfNotes - 1][1] = varFromClient_onlyCommand;
+                        incomingMessagesTable.Rows[maxNumberOfNotes - 1][2] = DateTime.Now.ToString();
+                        incomingMessagesTable.Rows[maxNumberOfNotes - 1][3] = addTypeOfMessage(fullVarFromClient, varFromClient_onlyCommand);
+                        incomingMessagesTable.Rows[maxNumberOfNotes - 1][4] = ProgramCondition(varFromClientBegin);
+
+                        addAtListView(incomingMessagesTable);
                     }
                     else
                     {
-                        addedCondition(varFromClient, varFromClient_onlyCommand);
+                        incomingMessagesTable.Rows.Add(new object[] { null, varFromClient_onlyCommand, DateTime.Now.ToString(), addTypeOfMessage(fullVarFromClient, varFromClient_onlyCommand), ProgramCondition(varFromClientBegin) }); // добавление в DataSet
+
+                        int index = listView1.Items.Add(incomingMessagesTable.Rows[listCounter - 1][0].ToString()).Index; // Добавление ID в listView
+                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][1].ToString()); // Добавление Сообщения в listView 
+                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][2].ToString()); // Добавление времени в listView 
+                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][3].ToString()); // Добавление Типа сообщения в listView 
+                        AttentionShow(cut_type, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
+                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][4].ToString()); // Добавление приложения в listView 
+                        ++listCounter;
                     }
+                    //if (checkMark(cut_type, incomingMessagesTable))
+                    //{
+
+                    //}
+
+                    LogWrighter(fullVarFromClient, varFromClient_onlyCommand);
                     client.Close();
                 }
                 catch (System.IO.IOException io)
@@ -90,11 +137,24 @@ namespace WinFormsTCP_Server
             }
         }
 
+        public void addAtListView(DataTable incomingMessagesTable)
+        {
+            listView1.Items.Clear();
+            for (int i = 0; i < incomingMessagesTable.Rows.Count; i++)
+            {
+                int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+
+            }
+        }
         //---------------------------Проверка условия----------------------------------------------
 
-        public void condition(string varFromClientEnd, string varFromClient_onlyCommand, int index, ref int countErrors, ref int countExceptions)
+        public void AttentionShow(string cut_type, string varFromClient_onlyCommand, int index, ref int countErrors, ref int countExceptions)
         {
-            switch (varFromClientEnd)
+            switch (cut_type)
             {
                 case "ftl":
                     lblErrorsValue.Text = countErrors.ToString();
@@ -132,6 +192,7 @@ namespace WinFormsTCP_Server
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 default:
+                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\success.ico");
                     //this.notifyIcon1.Icon = WinFormsTCP_Server.Properties.Resources();
                         //new Icon("success.ico");
                     break;
@@ -140,59 +201,94 @@ namespace WinFormsTCP_Server
 
 
         //------------------------Проверка на тип-----------------------------
-        public string addedCondition(string varFromClient, string varFromClient_onlyCommand)
+        public string addTypeOfMessage(string fullVarFromClient, string varFromClient_onlyCommand)
         {
-            string endStr = varFromClient.Remove(0, varFromClient.Length - 3);
-            switch (endStr)
+            string cut_type = fullVarFromClient.Remove(0, fullVarFromClient.Length - 3);
+            switch (cut_type)
             {
                 case "inf":
-                    cls.Info(varFromClient_onlyCommand);
                     return "Инфо";
                     break;
                 case "wrn":
-                    cls.Warning(varFromClient_onlyCommand);
                     return "Предупреждение";
                     break;
                 case "err":
-                    cls.Error(varFromClient_onlyCommand);
                     return "Ошибка";
                     break;
                 case "dbg":
-                    cls.Debug(varFromClient_onlyCommand);
                     return "Отладочное сообщение";
                     break;
                 case "ftl":
-                    cls.Fatal(varFromClient_onlyCommand);
                     return "Фатальная ошибка";
                     break;
                 default:
-                    cls.Info(varFromClient_onlyCommand);
                     return "Неизвестно";
                     break;
             }
         }
 
-        public bool checkMark(string varFromClientEnd)
+        //----------------------------Запись в лог-------------------------------------------
+        public void LogWrighter(string fullVarFromClient, string varFromClient_onlyCommand)
         {
-            switch (varFromClientEnd)
+            string cut_type = fullVarFromClient.Remove(0, fullVarFromClient.Length - 3);
+            switch (cut_type)
             {
                 case "inf":
-                    if (informMessagesToolStripMenuItem.Checked == true)
-                        return true;
-                    else
-                        return false;
+                    cls.Info(varFromClient_onlyCommand);
                     break;
                 case "wrn":
-                    if (warningsToolStripMenuItem.Checked == true)
-                        return true;
-                    else
-                        return false;
+                    cls.Warning(varFromClient_onlyCommand);
+                    break;
+                case "err":
+                    cls.Error(varFromClient_onlyCommand);
+                    break;
+                case "dbg":
+                    cls.Debug(varFromClient_onlyCommand);
+                    break;
+                case "ftl":
+                    cls.Fatal(varFromClient_onlyCommand);
                     break;
                 default:
-                    return true;
+                    cls.Info(varFromClient_onlyCommand);
                     break;
             }
         }
+
+
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        //public bool checkMark(string cut_type, DataTable incomingMessagesTable)
+        //{
+        //    switch (cut_type)
+        //    {
+        //        case "inf":
+        //            if (informMessagesToolStripMenuItem.Checked == true)
+        //                {
+        //                    listView1.Items.Clear();
+        //                    var selected_row = incomingMessagesTable.Select("Type = 'Инфо'");
+        //                    foreach (var b in selected_row)
+        //                    {
+        //                        int index = listView1.Items.Add(b[0].ToString()).Index;
+        //                        listView1.Items[index].SubItems.Add(b[1].ToString());
+        //                        listView1.Items[index].SubItems.Add(b[2].ToString());
+        //                        listView1.Items[index].SubItems.Add(b[3].ToString());
+        //                        listView1.Items[index].SubItems.Add(b[4].ToString());
+        //                }
+        //                    return true;
+        //                }
+        //            else
+        //                return false;
+        //            break;
+        //        case "wrn":
+        //            if (warningsToolStripMenuItem.Checked == true)
+        //                return true;
+        //            else
+        //                return false;
+        //            break;
+        //        default:
+        //            return true;
+        //            break;
+        //    }
+        //}
 
         //-------------------------Определение программы-------------------------
 
@@ -228,34 +324,8 @@ namespace WinFormsTCP_Server
 
         private void button1_Click(object sender, EventArgs e) // Тестовая кнопка
         {
-            //cls.Error("This is Error12122!");
-            //cls.Fatal("This is Fatal!");
-            //cls.Info("This is Info!");
-            //cls.Warning("This is Warning!");
-            //cls.Debug("This is Debug!");
-
-            //listView1.Items.Add("shit");
-
-
-            //if (this.WindowState == FormWindowState.Normal)
-            //    MessageBox.Show("It's normal");
-            //else if (this.WindowState == FormWindowState.Minimized)
-            //    MessageBox.Show("It's minimized");
-            //else if (this.WindowState == FormWindowState.Maximized)
-            //    MessageBox.Show("It's maximized");
-
-            //MessageBox.Show(local_host);
-            //MessageBox.Show(local_ipAddress);
-
-            try
-            {
-                ServiceController sc = new ServiceController("Report Manager32");
-                MessageBox.Show(sc.Status.ToString());
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            string path = "C:\\Users\\asu-GainullinRE\\Documents\\Visual Studio 2015\\Projects\\WinFormsTCP_Server\\WinFormsTCP_Server\\bin\\Debug";
+            System.Diagnostics.Process.Start("notepad");
         }
 
         private void listView1_DoubleClick(object sender, EventArgs e) // Двойной клик по элементу списка 
@@ -323,15 +393,56 @@ namespace WinFormsTCP_Server
         private void informMessagesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (informMessagesToolStripMenuItem.Checked == true)
+            {
                 informMessagesToolStripMenuItem.Checked = false;
+                //someNiceFunc();
+                //listView1.Items.Clear();
+            }
             else
                 informMessagesToolStripMenuItem.Checked = true;
         }
 
-        private void timerCheckStatus_Tick(object sender, EventArgs e)
+        private void someNiceFunc(DataTable incomingMessagesTable)
         {
+            listView1.Items.Clear();
+
+            var selected_row = incomingMessagesTable.Select("Type = 'Инфо'");
+            foreach (var b in selected_row)
+            {
+                int index = listView1.Items.Add(b[0].ToString()).Index;
+                listView1.Items[index].SubItems.Add(b[1].ToString());
+                listView1.Items[index].SubItems.Add(b[2].ToString());
+                listView1.Items[index].SubItems.Add(b[3].ToString());
+                listView1.Items[index].SubItems.Add(b[4].ToString());
+            }
+
 
         }
+
+        private void timerCheckStatus_Tick(object sender, EventArgs e)
+        {
+            string service_name = "Report Manager3";
+            ServiceController sc = new ServiceController(service_name);
+
+            switch (sc.Status.ToString())
+            {
+                case "Running":
+                    lblConnection.Text = "Служба " + service_name + " работает";
+                    break;
+                case "Stopped":
+                    lblConnection.Text = "Служба " + service_name + " остановлена";
+                    break;
+                case "StartPending":
+                    lblConnection.Text = "Служба " + service_name + " запускается";
+                    break;
+                case "StopPending":
+                    lblConnection.Text = "Служба " + service_name + " останавливается";
+                    break;
+            }
+            //GC.Collect();
+            sc.Dispose();
+        }
+
         //-------------------------------------------------------------------------------
     }
 
