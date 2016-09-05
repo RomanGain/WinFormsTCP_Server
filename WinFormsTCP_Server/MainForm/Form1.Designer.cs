@@ -59,6 +59,7 @@
             this.groupBoxErorsAndWarnings = new System.Windows.Forms.GroupBox();
             this.timerCheckStatus = new System.Windows.Forms.Timer(this.components);
             this.lblConnection = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.groupBoxErorsAndWarnings.SuspendLayout();
@@ -207,20 +208,21 @@
             // 
             // параметрыToolStripMenuItem
             // 
+            this.параметрыToolStripMenuItem.Enabled = false;
             this.параметрыToolStripMenuItem.Name = "параметрыToolStripMenuItem";
-            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.параметрыToolStripMenuItem.Text = "Параметры...";
             this.параметрыToolStripMenuItem.Click += new System.EventHandler(this.параметрыToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(140, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // выходToolStripMenuItem
             // 
             this.выходToolStripMenuItem.Name = "выходToolStripMenuItem";
-            this.выходToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.выходToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.выходToolStripMenuItem.Text = "Выход";
             this.выходToolStripMenuItem.Click += new System.EventHandler(this.выходToolStripMenuItem_Click);
             // 
@@ -242,7 +244,6 @@
             this.errorsToolStripMenuItem.Name = "errorsToolStripMenuItem";
             this.errorsToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.errorsToolStripMenuItem.Text = "Ошибки";
-            this.errorsToolStripMenuItem.Click += new System.EventHandler(this.errorsToolStripMenuItem_Click);
             // 
             // warningsToolStripMenuItem
             // 
@@ -298,12 +299,22 @@
             this.lblConnection.TabIndex = 19;
             this.lblConnection.Text = "label1";
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(174, 584);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 20;
+            this.button2.Text = "Test";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(931, 619);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.lblConnection);
             this.Controls.Add(this.btnClear);
             this.Controls.Add(this.menuStrip1);
@@ -354,6 +365,7 @@
         private System.Windows.Forms.GroupBox groupBoxErorsAndWarnings;
         private System.Windows.Forms.Timer timerCheckStatus;
         private System.Windows.Forms.Label lblConnection;
+        private System.Windows.Forms.Button button2;
     }
 }
 

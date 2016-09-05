@@ -28,9 +28,12 @@ namespace WinFormsTCP_Server
         static string local_host = System.Net.Dns.GetHostName();
         static string local_ipAddress = Dns.GetHostByName(local_host).AddressList[0].ToString(); // устаревшее?
         static int maxNumberOfNotes = 20; // максимальное количество записей в dataSet
+        DataSet ds = new DataSet();
+        DataTable incomingMessagesTable = new DataTable();
+
 
         //static string ip_address = System.Net.Dns.GetHostName();
-            //"127.0.0.1";
+        //"127.0.0.1";
         static int port = 11000;
         TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Parse(local_ipAddress), port));
 
@@ -49,6 +52,7 @@ namespace WinFormsTCP_Server
             Thread myThread = new Thread(someFunc);
             myThread.IsBackground = true;
             myThread.Start();
+
         }
 
         public void someFunc()
@@ -56,9 +60,6 @@ namespace WinFormsTCP_Server
             int countErrors = 0, countExceptions = 0; // вывод на форму числа ошибок, исключений
             int listCounter = 1; // счетчик числа сообщений в listView
             System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false; // ненадежная фигня :/
-
-            DataSet ds = new DataSet();
-            DataTable incomingMessagesTable = new DataTable();
 
             ds.Tables.Add(incomingMessagesTable);
 
@@ -108,25 +109,26 @@ namespace WinFormsTCP_Server
                         incomingMessagesTable.Rows[maxNumberOfNotes - 1][3] = addTypeOfMessage(fullVarFromClient, varFromClient_onlyCommand);
                         incomingMessagesTable.Rows[maxNumberOfNotes - 1][4] = ProgramCondition(varFromClientBegin);
 
-                        addAtListView(incomingMessagesTable);
+                        if (checkMark(cut_type))
+                        {
+                            addAtListView(incomingMessagesTable);
+                        }
                     }
                     else
                     {
                         incomingMessagesTable.Rows.Add(new object[] { null, varFromClient_onlyCommand, DateTime.Now.ToString(), addTypeOfMessage(fullVarFromClient, varFromClient_onlyCommand), ProgramCondition(varFromClientBegin) }); // добавление в DataSet
 
-                        int index = listView1.Items.Add(incomingMessagesTable.Rows[listCounter - 1][0].ToString()).Index; // Добавление ID в listView
-                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][1].ToString()); // Добавление Сообщения в listView 
-                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][2].ToString()); // Добавление времени в listView 
-                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][3].ToString()); // Добавление Типа сообщения в listView 
-                        AttentionShow(cut_type, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
-                        listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][4].ToString()); // Добавление приложения в listView 
-                        ++listCounter;
+                        if (checkMark(cut_type))
+                        {
+                            int index = listView1.Items.Add(incomingMessagesTable.Rows[listCounter - 1][0].ToString()).Index; // Добавление ID в listView
+                            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][1].ToString()); // Добавление Сообщения в listView 
+                            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][2].ToString()); // Добавление времени в listView 
+                            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][3].ToString()); // Добавление Типа сообщения в listView 
+                            AttentionShow(cut_type, varFromClient_onlyCommand, index, ref countErrors, ref countExceptions);
+                            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[listCounter - 1][4].ToString()); // Добавление приложения в listView 
+                            ++listCounter;
+                        }
                     }
-                    //if (checkMark(cut_type, incomingMessagesTable))
-                    //{
-
-                    //}
-
                     LogWrighter(fullVarFromClient, varFromClient_onlyCommand);
                     client.Close();
                 }
@@ -148,6 +150,10 @@ namespace WinFormsTCP_Server
                 listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
                 listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
 
+                if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                    listView1.Items[index].BackColor = Color.Coral;
+                if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                    listView1.Items[index].BackColor = Color.SandyBrown;
             }
         }
         //---------------------------Проверка условия----------------------------------------------
@@ -173,8 +179,9 @@ namespace WinFormsTCP_Server
                     listView1.Items[index].BackColor = Color.Coral;
 
                     //contextMenuStrip1.Show();
-                    contextMenuStrip1.Items.Add(new ToolStripSeparator());
-                    contextMenuStrip1.Items.Add(varFromClient_onlyCommand);
+                    //contextMenuStrip1.Items.Add(new ToolStripSeparator());
+                    //contextMenuStrip1.Items.Add(varFromClient_onlyCommand, func());
+
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
                     notifyIcon1.BalloonTipTitle = "Ошибка";
                     notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
@@ -197,6 +204,11 @@ namespace WinFormsTCP_Server
                         //new Icon("success.ico");
                     break;
             }
+        }
+        
+        public void func()
+        {
+            MessageBox.Show("dfgg");
         }
 
 
@@ -256,39 +268,31 @@ namespace WinFormsTCP_Server
 
 
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        //public bool checkMark(string cut_type, DataTable incomingMessagesTable)
-        //{
-        //    switch (cut_type)
-        //    {
-        //        case "inf":
-        //            if (informMessagesToolStripMenuItem.Checked == true)
-        //                {
-        //                    listView1.Items.Clear();
-        //                    var selected_row = incomingMessagesTable.Select("Type = 'Инфо'");
-        //                    foreach (var b in selected_row)
-        //                    {
-        //                        int index = listView1.Items.Add(b[0].ToString()).Index;
-        //                        listView1.Items[index].SubItems.Add(b[1].ToString());
-        //                        listView1.Items[index].SubItems.Add(b[2].ToString());
-        //                        listView1.Items[index].SubItems.Add(b[3].ToString());
-        //                        listView1.Items[index].SubItems.Add(b[4].ToString());
-        //                }
-        //                    return true;
-        //                }
-        //            else
-        //                return false;
-        //            break;
-        //        case "wrn":
-        //            if (warningsToolStripMenuItem.Checked == true)
-        //                return true;
-        //            else
-        //                return false;
-        //            break;
-        //        default:
-        //            return true;
-        //            break;
-        //    }
-        //}
+        public bool checkMark(string type_of_message)
+        {
+            switch (type_of_message)
+            {
+                case "inf":
+
+                    if (informMessagesToolStripMenuItem.Checked == true)
+                        return true;
+                    else
+                        return false;
+                    break;
+
+                case "wrn":
+
+                    if (warningsToolStripMenuItem.Checked == true)
+                        return true;
+                    else
+                        return false;
+                    break;
+
+                default:
+                    return true;
+                    break;
+            }
+        }
 
         //-------------------------Определение программы-------------------------
 
@@ -324,8 +328,10 @@ namespace WinFormsTCP_Server
 
         private void button1_Click(object sender, EventArgs e) // Тестовая кнопка
         {
-            string path = "C:\\Users\\asu-GainullinRE\\Documents\\Visual Studio 2015\\Projects\\WinFormsTCP_Server\\WinFormsTCP_Server\\bin\\Debug";
-            System.Diagnostics.Process.Start("notepad");
+            //string path = "C:\\Users\\asu-GainullinRE\\Documents\\Visual Studio 2015\\Projects\\WinFormsTCP_Server\\WinFormsTCP_Server\\bin\\Debug";
+            //System.Diagnostics.Process.Start("notepad");
+
+            //UpdateListView();
         }
 
         private void listView1_DoubleClick(object sender, EventArgs e) // Двойной клик по элементу списка 
@@ -374,20 +380,28 @@ namespace WinFormsTCP_Server
 
         //---------------------------------------- Формат -------------------------------
 
-        private void errorsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (errorsToolStripMenuItem.Checked == true)
-                errorsToolStripMenuItem.Checked = false;
-            else
-                errorsToolStripMenuItem.Checked = true;
-        }
-
         private void warningsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (warningsToolStripMenuItem.Checked == true)
+            {
                 warningsToolStripMenuItem.Checked = false;
+                listView1.Items.Clear();
+
+                if (informMessagesToolStripMenuItem.Checked == true)
+                    UpdateListView2();
+                else
+                    UpdateListView4();
+            }
             else
+            {
                 warningsToolStripMenuItem.Checked = true;
+                listView1.Items.Clear();
+
+                if (informMessagesToolStripMenuItem.Checked == true)
+                    UpdateListView1();
+                else
+                    UpdateListView3();
+            }
         }
 
         private void informMessagesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -395,12 +409,131 @@ namespace WinFormsTCP_Server
             if (informMessagesToolStripMenuItem.Checked == true)
             {
                 informMessagesToolStripMenuItem.Checked = false;
-                //someNiceFunc();
-                //listView1.Items.Clear();
+                listView1.Items.Clear();
+
+                if (warningsToolStripMenuItem.Checked == true)
+                    UpdateListView3();
+                else
+                    UpdateListView4();
             }
             else
+            {
                 informMessagesToolStripMenuItem.Checked = true;
+                listView1.Items.Clear();
+
+                if (warningsToolStripMenuItem.Checked == true)
+                    UpdateListView1();
+                else
+                    UpdateListView2();
+            }
         }
+
+        public void UpdateListView1()
+        {
+            for (int i = 0; i < incomingMessagesTable.Rows.Count; i++)
+            {
+                if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка" || incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение" || incomingMessagesTable.Rows[i][3].ToString() == "Инфо")
+                {
+                    int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                        listView1.Items[index].BackColor = Color.Coral;
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                        listView1.Items[index].BackColor = Color.SandyBrown;
+                }
+            }
+        }
+
+        public void UpdateListView2()
+        {
+            for (int i = 0; i < incomingMessagesTable.Rows.Count; i++)
+            {
+                if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка" || incomingMessagesTable.Rows[i][3].ToString() == "Инфо")
+                {
+                    int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                        listView1.Items[index].BackColor = Color.Coral;
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                        listView1.Items[index].BackColor = Color.SandyBrown;
+
+                }
+            }
+        }
+
+        public void UpdateListView3()
+        {
+            for (int i = 0; i < incomingMessagesTable.Rows.Count; i++)
+            {
+                if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка" || incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                {
+                    int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                        listView1.Items[index].BackColor = Color.Coral;
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                        listView1.Items[index].BackColor = Color.SandyBrown;
+                }
+            }
+        }
+
+        public void UpdateListView4()
+        {
+            for (int i = 0; i < incomingMessagesTable.Rows.Count; i++)
+            {
+                if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                {
+                    int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                        listView1.Items[index].BackColor = Color.Coral;
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                        listView1.Items[index].BackColor = Color.SandyBrown;
+                }
+            }
+        }
+
+
+        //public void UpdateListView(string type_of_message)
+        //{
+        //    //MessageBox.Show(incomingMessagesTable.Rows.Count.ToString());
+           
+
+        //    for (int i = 0; i < incomingMessagesTable.Rows.Count; i++ )
+        //    {
+        //        if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка" || incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение" || incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+        //        {
+
+        //        }
+
+
+
+        //        if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка" || incomingMessagesTable.Rows[i][3].ToString() == type_of_message )
+        //        {
+        //            int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+        //            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+        //            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+        //            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+        //            listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+        //        }
+        //    }
+        //}
 
         private void someNiceFunc(DataTable incomingMessagesTable)
         {
@@ -415,8 +548,6 @@ namespace WinFormsTCP_Server
                 listView1.Items[index].SubItems.Add(b[3].ToString());
                 listView1.Items[index].SubItems.Add(b[4].ToString());
             }
-
-
         }
 
         private void timerCheckStatus_Tick(object sender, EventArgs e)
