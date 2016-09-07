@@ -111,7 +111,8 @@ namespace WinFormsTCP_Server
 
                         if (checkMark(cut_type))
                         {
-                            addAtListView(incomingMessagesTable);
+                            addAtListView(incomingMessagesTable, cut_type);
+                            AttentionShowMore20(cut_type, varFromClient_onlyCommand, ref countErrors, ref countExceptions);
                         }
                     }
                     else
@@ -129,6 +130,7 @@ namespace WinFormsTCP_Server
                             ++listCounter;
                         }
                     }
+
                     LogWrighter(fullVarFromClient, varFromClient_onlyCommand);
                     client.Close();
                 }
@@ -139,21 +141,24 @@ namespace WinFormsTCP_Server
             }
         }
 
-        public void addAtListView(DataTable incomingMessagesTable)
+        public void addAtListView(DataTable incomingMessagesTable, string cut_type)
         {
             listView1.Items.Clear();
             for (int i = 0; i < incomingMessagesTable.Rows.Count; i++)
             {
-                int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
-                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
-                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
-                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
-                listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
+                if (checkMarkNew(incomingMessagesTable.Rows[i][3].ToString()))
+                {
+                    int index = listView1.Items.Add(incomingMessagesTable.Rows[i][0].ToString()).Index;
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][1].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][2].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][3].ToString());
+                    listView1.Items[index].SubItems.Add(incomingMessagesTable.Rows[i][4].ToString());
 
-                if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
-                    listView1.Items[index].BackColor = Color.Coral;
-                if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
-                    listView1.Items[index].BackColor = Color.SandyBrown;
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Ошибка")
+                        listView1.Items[index].BackColor = Color.Coral;
+                    if (incomingMessagesTable.Rows[i][3].ToString() == "Предупреждение")
+                        listView1.Items[index].BackColor = Color.SandyBrown;
+                }
             }
         }
         //---------------------------Проверка условия----------------------------------------------
@@ -164,7 +169,8 @@ namespace WinFormsTCP_Server
             {
                 case "ftl":
                     lblErrorsValue.Text = countErrors.ToString();
-                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\delete1");
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\delete1");
+                    
                     listView1.Items[index].BackColor = Color.Coral;
 
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
@@ -175,7 +181,7 @@ namespace WinFormsTCP_Server
                 case "err":
                     ++countErrors;
                     lblErrorsValue.Text = countErrors.ToString();
-                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\delete1.ico");
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\delete1.ico");
                     listView1.Items[index].BackColor = Color.Coral;
 
                     //contextMenuStrip1.Show();
@@ -190,7 +196,7 @@ namespace WinFormsTCP_Server
                 case "wrn":
                     ++countExceptions;
                     lblExceptionsValue.Text = countExceptions.ToString();
-                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\alert.ico");
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\alert.ico");
                     listView1.Items[index].BackColor = Color.SandyBrown;
 
                     notifyIcon1.BalloonTipIcon = ToolTipIcon.Warning;
@@ -199,13 +205,60 @@ namespace WinFormsTCP_Server
                     notifyIcon1.ShowBalloonTip(4);
                     break;
                 default:
-                    this.notifyIcon1.Icon = new Icon("..\\Debug\\icons\\success.ico");
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\success.ico");
                     //this.notifyIcon1.Icon = WinFormsTCP_Server.Properties.Resources();
                         //new Icon("success.ico");
                     break;
             }
         }
-        
+
+        //-----------------------------------------------------------------------
+
+        public void AttentionShowMore20(string cut_type, string varFromClient_onlyCommand, ref int countErrors, ref int countExceptions)
+        {
+            switch (cut_type)
+            {
+                case "ftl":
+                    lblErrorsValue.Text = countErrors.ToString();
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\delete1");
+
+                    notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
+                    notifyIcon1.BalloonTipTitle = "Фатальная ошибка";
+                    notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
+                    notifyIcon1.ShowBalloonTip(4);
+                    break;
+                case "err":
+                    ++countErrors;
+                    lblErrorsValue.Text = countErrors.ToString();
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\delete1.ico");
+
+                    //contextMenuStrip1.Show();
+                    //contextMenuStrip1.Items.Add(new ToolStripSeparator());
+                    //contextMenuStrip1.Items.Add(varFromClient_onlyCommand, func());
+
+                    notifyIcon1.BalloonTipIcon = ToolTipIcon.Error;
+                    notifyIcon1.BalloonTipTitle = "Ошибка";
+                    notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
+                    notifyIcon1.ShowBalloonTip(4);
+                    break;
+                case "wrn":
+                    ++countExceptions;
+                    lblExceptionsValue.Text = countExceptions.ToString();
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\alert.ico");
+
+                    notifyIcon1.BalloonTipIcon = ToolTipIcon.Warning;
+                    notifyIcon1.BalloonTipTitle = "Предупреждение";
+                    notifyIcon1.BalloonTipText = varFromClient_onlyCommand;
+                    notifyIcon1.ShowBalloonTip(4);
+                    break;
+                default:
+                    this.notifyIcon1.Icon = new Icon(Environment.CurrentDirectory + "\\icons\\success.ico");
+                    //this.notifyIcon1.Icon = WinFormsTCP_Server.Properties.Resources();
+                    //new Icon("success.ico");
+                    break;
+            }
+        }
+
         public void func()
         {
             MessageBox.Show("dfgg");
@@ -281,6 +334,32 @@ namespace WinFormsTCP_Server
                     break;
 
                 case "wrn":
+
+                    if (warningsToolStripMenuItem.Checked == true)
+                        return true;
+                    else
+                        return false;
+                    break;
+
+                default:
+                    return true;
+                    break;
+            }
+        }
+
+        public bool checkMarkNew(string type_of_message)
+        {
+            switch (type_of_message)
+            {
+                case "Инфо":
+
+                    if (informMessagesToolStripMenuItem.Checked == true)
+                        return true;
+                    else
+                        return false;
+                    break;
+
+                case "Предупреждение":
 
                     if (warningsToolStripMenuItem.Checked == true)
                         return true;
@@ -555,21 +634,21 @@ namespace WinFormsTCP_Server
             string service_name = "Report Manager3";
             ServiceController sc = new ServiceController(service_name);
 
-            switch (sc.Status.ToString())
-            {
-                case "Running":
-                    lblConnection.Text = "Служба " + service_name + " работает";
-                    break;
-                case "Stopped":
-                    lblConnection.Text = "Служба " + service_name + " остановлена";
-                    break;
-                case "StartPending":
-                    lblConnection.Text = "Служба " + service_name + " запускается";
-                    break;
-                case "StopPending":
-                    lblConnection.Text = "Служба " + service_name + " останавливается";
-                    break;
-            }
+            //switch (sc.Status.ToString())
+            //{
+            //    case "Running":
+            //        lblConnection.Text = "Служба " + service_name + " работает";
+            //        break;
+            //    case "Stopped":
+            //        lblConnection.Text = "Служба " + service_name + " остановлена";
+            //        break;
+            //    case "StartPending":
+            //        lblConnection.Text = "Служба " + service_name + " запускается";
+            //        break;
+            //    case "StopPending":
+            //        lblConnection.Text = "Служба " + service_name + " останавливается";
+            //        break;
+            //}
             //GC.Collect();
             sc.Dispose();
         }
